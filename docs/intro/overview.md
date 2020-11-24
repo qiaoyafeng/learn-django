@@ -7,25 +7,25 @@ Django 最初被设计用于具有快速开发需求的新闻类站点，目的�
 设计模型
 ============
 
-.. code-block:: python
-    :caption: mysite/news/models.py
+```
+from django.db import models
 
-    from django.db import models
+class Reporter(models.Model):
+    full_name = models.CharField(max_length=70)
 
-    class Reporter(models.Model):
-        full_name = models.CharField(max_length=70)
+    def __str__(self):
+        return self.full_name
 
-        def __str__(self):
-            return self.full_name
+class Article(models.Model):
+    pub_date = models.DateField()
+    headline = models.CharField(max_length=200)
+    content = models.TextField()
+    reporter = models.ForeignKey(Reporter, on_delete=models.CASCADE)
 
-    class Article(models.Model):
-        pub_date = models.DateField()
-        headline = models.CharField(max_length=200)
-        content = models.TextField()
-        reporter = models.ForeignKey(Reporter, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.headline
 
-        def __str__(self):
-            return self.headline
+```
 
 应用数据模型
 ============
@@ -34,5 +34,5 @@ Django 最初被设计用于具有快速开发需求的新闻类站点，目的�
 
     $ python manage.py makemigrations
     $ python manage.py migrate
-    
+
 该 makemigrations 命令查找所有可用的models，为任意一个在数据库中不存在对应数据表的model创建 migrations 脚本文件。migrate 命令则运行这些 migrations 自动创建数据库表。还提供可选的 更丰富的控制模式。

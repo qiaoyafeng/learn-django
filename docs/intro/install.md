@@ -4,8 +4,8 @@
 安装 Python
 ==============
 ```
-Python 3.x.y
-[GCC 4.x] on linux
+(learn-django) D:\PythonVENV\Python36>python
+Python 3.6.6rc1 (v3.6.6rc1:1015e38be4, Jun 12 2018, 08:38:06) [MSC v.1900 64 bit (AMD64)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
 >>>
 ```
@@ -14,13 +14,11 @@ Type "help", "copyright", "credits" or "license" for more information.
 安装并验证 Django
 ==============
 ```
->>> import django
->>> print(django.get_version())
-3.1
-
+(learn-django) D:\PythonVENV\Python36>python
+Python 3.6.6rc1 (v3.6.6rc1:1015e38be4, Jun 12 2018, 08:38:06) [MSC v.1900 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
 ```
 
 搞定！
 ==========
-
-That's it -- you can now :doc:`move onto the tutorial </intro/tutorial01>`.
