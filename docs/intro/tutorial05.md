@@ -176,6 +176,176 @@ polls/tests.py
 
 现在，我们有三个测试来确保 Question.was_published_recently() 方法对于过去，最近，和将来的三种情况都返回正确的值。
 
+## 测试视图
+如果 pub_date 设置为未来某天，这应该被解释为这个问题将在所填写的时间点才被发布，而在之前是不可见的。
+
+### 针对视图的测试
+
+在我们的第一个测试中，我们关注代码的内部行为。我们通过模拟用户使用浏览器访问被测试的应用来检查代码行为是否符合预期。
+
+在我们动手之前，先看看需要用到的工具们。
+
+#### Django 测试工具之 Client
+
+Django 提供了一个供测试使用的 Client 来模拟用户和视图层代码的交互。
+
+第一步是在 shell 中配置测试环境:
+
+```python
+Python 3.6.6rc1 (v3.6.6rc1:1015e38be4, Jun 12 2018, 08:38:06) [MSC v.1900 64 bit (AMD64)] on win32
+Django 2.2.12
+>>> from django.test.utils import setup_test_environment
+>>> setup_test_environment()
+
+```
+setup_test_environment() 提供了一个模板渲染器，允许我们为 responses 添加一些额外的属性，例如 response.context，未安装此 app 无法使用此功能。
+
+导入Client包，并运行：
+```python
+
+Python 3.6.6rc1 (v3.6.6rc1:1015e38be4, Jun 12 2018, 08:38:06) [MSC v.1900 64 bit (AMD64)] on win32
+Django 2.2.12
+>>> from django.test.utils import setup_test_environment
+>>> setup_test_environment()
+>>> from django.test import Client
+>>> client = Client()
+>>> response = client.get('/')
+Not Found: /
+>>> response.status_code
+404
+>>> from django.urls import reverse
+>>> response = client.get(reverse('polls:index'))
+>>> response.status_code
+200
+>>> response.content
+b'\n    <ul>\n    \n        <li><a href="/polls/2/">What&#39;s your name?</a></li>\n    \n        <li><a href="/polls/1/">What&#39;s new</a></li>\n    \n    </ul>\n'
+>>> response.context['latest_question_list']
+<QuerySet [<Question: What's your name?>, <Question: What's new>]>
+>>> 
+>>> 
+
+```
+
+#### 改善视图代码
+
+现在的投票列表会显示将来的投票（ pub_date 值是未来的某天)。我们来修复这个问题。
+
+ListView 的视图类：需要改进 get_queryset() 方法，让他它能通过将 Question 的 pub_data 属性与 timezone.now() 相比较来判断是否应该显示此 Question。
+
+```python
+from django.utils import timezone
+
+class IndexView(generic.ListView):
+    template_name = 'polls/index.html'
+    context_object_name = 'latest_question_list'
+
+    def get_queryset(self):
+        """
+        :return: Return the last five published questions(not including those set to be published in the future).
+        """
+        return Question.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5]
+
+
+```
+
+#### 测试新视图
+
+写一个公用的快捷函数用于创建投票问题，再为视图创建一个测试类：
+
+将下面的代码添加到 polls/tests.py ：
+
+```python
+
+
+from django.urls import reverse
+
+def create_question(question_text, days):
+    """
+    Create a question with the given `question_text` and published the
+    given number of `days` offset to now (negative for questions published
+    in the past, positive for questions that have yet to be published).
+    """
+    time = timezone.now() + datetime.timedelta(days=days)
+    return Question.objects.create(question_text=question_text, pub_date=time)
+
+
+class QuestionIndexViewTests(TestCase):
+    def test_no_questions(self):
+        """
+        If no quesions exist, an appropriate message displayed.
+        """
+        response = self.client.get(reverse('polls:index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No polls are available.")
+        self.assertQuerysetEqual(response.context['latest_question_list'], [])
+
+    def test_past_questions(self):
+        """
+        Questions with a pub_date in the past are displayed on the
+        index page.
+        """
+        create_question(question_text="Past question", days=-30)
+        response = self.client.get(reverse('polls:index'))
+        self.assertQuerysetEqual(response.context['latest_question_list'], ['<Question: Past question.>'])
+
+    def test_future_question(self):
+        """
+        Questions with a pub_date in the future aren't displayed on
+        the index page.
+        """
+        create_question(question_text="Future question", days=30)
+        response = self.client.get(reverse('polls:index'))
+        self.assertContains(response, "No polls are available.")
+        self.assertQuerysetEqual(response.context['latest_question_list'], [])
+
+    def test_future_question_and_past_question(self):
+        """
+        Even if both past and future questions exist, only past questions
+        are displayed.
+        """
+        create_question(question_text="Past question.", days=-30)
+        create_question(question_text="Future question.", days=30)
+        response = self.client.get(reverse('polls:index'))
+        self.assertQuerysetEqual(
+            response.context['latest_question_list'],
+            ['<Question: Past question.>']
+        )
+
+    def test_two_past_questions(self):
+        """
+        The questions index page may display multiple questions.
+        """
+        create_question(question_text="Past question 1.", days=-30)
+        create_question(question_text="Past question 2.", days=-5)
+        response = self.client.get(reverse('polls:index'))
+        self.assertQuerysetEqual(
+            response.context['latest_question_list'],
+            ['<Question: Past question 2.>', '<Question: Past question 1.>']
+        )
+
+
+
+```
+
+让我们更详细地看下以上这些内容。
+
+首先是一个快捷函数 create_question，它封装了创建投票的流程，减少了重复代码。
+
+test_no_questions 方法里没有创建任何投票，它检查返回的网页上有没有 "No polls are available." 这段消息和 latest_question_list 是否为空。注意到 django.test.TestCase 类提供了一些额外的 assertion 方法，在这个例子中，我们使用了 assertContains() 和 assertQuerysetEqual() 。
+
+在 test_past_question 方法中，我们创建了一个投票并检查它是否出现在列表中。
+
+在 test_future_question 中，我们创建 pub_date 在未来某天的投票。数据库会在每次调用测试方法前被重置，所以第一个投票已经没了，所以主页中应该没有任何投票。
+
+剩下的那些也都差不多。实际上，测试就是假装一些管理员的输入，然后通过用户端的表现是否符合预期来判断新加入的改变是否破坏了原有的系统状态。
+
+
+#### 当需要测试的时候，测试用例越多越好
+如果你对测试有个整体规划，那么它们就几乎不会变得混乱。下面有几条好的建议：
+
+- 对于每个模型和视图都建立单独的 TestClass
+- 每个测试方法只测试一个功能
+- 给每个测试方法起个能描述其功能的名字
 
 
 ## 接下来要做什么？
