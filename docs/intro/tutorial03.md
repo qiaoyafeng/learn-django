@@ -156,3 +156,58 @@ def index(request):
 
 详情：  
 ![detail](_images/t03-2.jpg)
+
+
+## 一个快捷函数： render()
+「载入模板，填充上下文，再返回由它生成的 HttpResponse 对象」是一个非常常用的操作流程。于是 Django 提供了一个快捷函数，我们用它来重写 index() 视图：
+
+ polls/views.py
+```python
+from django.shortcuts import render
+
+from .models import Question
+
+def index(request):
+    latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    context = {
+        'latest_question_list': latest_question_list,
+    }
+    return render(request, 'polls/index.html', context)
+
+```
+
+注意到，我们不再需要导入 loader 和 HttpResponse 。不过如果你还有其他函数（比如说 detail, results, 和 vote ）需要用到它的话，就需要保持 HttpResponse 的导入。  
+
+## 抛出 404 错误
+
+现在，我们来处理投票详情视图——它会显示指定投票的问题标题。下面是这个视图的代码：
+
+polls/views.py
+```python
+
+from django.http import Http404
+from django.shortcuts import render
+
+from .models import Question
+
+
+
+def detail(request, question_id):
+    try:
+        question = Question.objects.get(pk=question_id)
+    except Question.DoesNotExist:
+        raise Http404("Question does not exist")
+    return render(request, 'polls/detail.html', {'question': question})
+
+```
+
+这里有个新原则。如果指定问题 ID 所对应的问题不存在，这个视图就会抛出一个 Http404 异常。
+
+需要在 polls/detail.html 里输入什么，但是如果你想试试上面这段代码是否正常工作的话，你可以暂时把下面这段输进去：
+
+polls/templates/polls/detail.html
+```html
+{{ question }}
+```
+
+## 一个快捷函数： get_object_or_404()
