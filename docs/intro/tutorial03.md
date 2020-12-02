@@ -283,3 +283,43 @@ path('<int:question_id>/', views.detail, name='detail'),
 path('specifics/<int:question_id>/', views.detail, name='detail'),
 ...
 ```
+
+## 为 URL 名称添加命名空间
+
+教程项目只有一个应用，polls 。在一个真实的 Django 项目中，可能会有五个，十个，二十个，甚至更多应用。Django 如何分辨重名的 URL 呢？举个例子，polls 应用有 detail 视图，可能另一个博客应用也有同名的视图。Django 如何知道 {% url %} 标签到底对应哪一个应用的 URL 呢？
+
+答案是：在根 URLconf 中添加命名空间。在 polls/urls.py 文件中稍作修改，加上 app_name 设置命名空间：  
+polls/urls.py
+```python
+
+from  django.urls import path
+
+from . import views
+
+app_name = 'polls'
+
+urlpatterns = [
+    # ex: /polls/
+    path('', views.index, name='index'),
+    # ex: /polls/5/
+    path('<int:question_id>/', views.detail, name='detail'),
+    # ex: /polls/5/results/
+    path('<int:question_id>/results/', views.results, name='result'),
+    # ex: /polls/5/vote/
+    path('<int:question_id>/vote/', views.vote, name='vote'),
+]
+
+```
+
+现在，编辑 polls/index.html 文件，从：  
+polls/templates/polls/index.html
+```html
+<li><a href="{% url 'detail' question.id %}">{{ question.question_text }}</a></li>
+```
+
+修改为指向具有命名空间的详细视图：  
+polls/templates/polls/index.html
+```html
+<li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
+```
+当你对你写的视图感到满意后，请阅读 [教程的第 4 部分](tutorial04.md) 了解简单的表单处理和通用视图。
