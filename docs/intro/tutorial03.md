@@ -147,5 +147,12 @@ def index(request):
 
 ```
 
+上述代码的作用是，载入 polls/index.html 模板文件，并且向它传递一个上下文(context)。这个上下文是一个字典，它将模板内的变量映射为 Python 对象。  
 
-上述代码的作用是，载入 polls/index.html 模板文件，并且向它传递一个上下文(context)。这个上下文是一个字典，它将模板内的变量映射为 Python 对象。
+用你的浏览器访问 "/polls/" ，你将会看见一个无序列表，链接指向这个投票的详情页。
+
+列表：  
+![polls](_images/t03-1.jpg)
+
+详情：  
+![detail](_images/t03-2.jpg)
