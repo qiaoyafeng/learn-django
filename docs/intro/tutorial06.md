@@ -35,14 +35,18 @@ li a {
 
 ![style](_images/t06-1.jpg)
 
+## 添加一个背景图
 
+接着，我们会创建一个用于存在图像的目录。在 polls/static/polls 目录下创建一个名为 images 的子目录。在这个目录中，放一张名为 background.jpg 的图片。换言之，在目录 polls/static/polls/images/background.jpg 中放一张图片。
 
+随后，在你的样式表（polls/static/polls/style.css）中添加：
 
-
-
-
-
-
+```css
+body {
+    background: white url("images/background.jpg") no-repeat;
+}
+```
+浏览器重载 http://localhost:8000/polls/，你将在屏幕的左上角见到这张背景图。
 
 
 ## 接下来要做什么？
