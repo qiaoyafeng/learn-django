@@ -160,6 +160,61 @@ search_fields = ['question_text']
 
 ![t07-9](_images/t07-9.jpg)
 
+
+## 自定义后台界面和风格
+在每个后台页顶部显示“Django 管理员”显得很滑稽。这只是一串占位文本。
+### 自定义你的 工程的 模板
+
+在你的工程目录（指包含 manage.py 的那个文件夹）内创建一个名为 templates 的目录。模板可放在你系统中任何 Django 能找到的位置。（谁启动了 Django，Django 就以他的用户身份运行。）不过，把你的模板放在工程内会带来很大便利，推荐你这样做。
+
+打开你的设置文件（mysite/settings.py，牢记），在 TEMPLATES 设置中添加 DIRS 选项：
+
+```python
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+```
+DIRS 是一个包含多个系统目录的文件列表，用于在载入 Django 模板时使用，是一个待搜索路径。
+
+> **组织模板**
+>> 就像静态文件一样，我们 可以 把所有的模板文件放在一个大模板目录内，这样它也能工作的很好。但是，属于特定应用的模板文件最好放在应用所属的模板目录（例如 polls/templates），而不是工程的模板目录（templates）。
+
+
+现在，在 templates 目录内创建名为 admin 的目录，随后，将存放 Django 默认模板的目录（django/contrib/admin/templates）内的模板文件 admin/base_site.html 复制到这个目录内。
+
+
+> Django 的源文件在哪里？
+>> 如果你不知道 Django 源码在你系统的哪个位置，运行以下命令：
+>> `python -c "import django; print(django.__path__)"`
+
+接着，用你站点的名字替换文件内的 ``{{ site_header|default:_('Django administration') }}``（包含大括号）。完成后，你应该看到如下代码：
+
+```html
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Qiao administration</a></h1>
+{% endblock %}
+
+```
+![t07-10](_images/t07-10.jpg)
+
+注意，所有的 Django 默认后台模板均可被复写。若要复写模板，像你修改 base_site.html 一样修改其它文件——先将其从默认目录中拷贝到你的自定义目录，再做修改。
+
+
+
+
+
 ## 接下来要做什么？
 
 当你熟悉静态文件后，阅读[教程的第 7 部分](tutorial07.md)  来学习如何自定义 Django 自动生成后台网页的过程。
