@@ -16,3 +16,87 @@
 >> 一个包通过 import foo.bar 或 from foo import bar 的形式导入。一个目录（例如 polls）要成为一个包，它必须包含一个特定的文件 __init__.py，即便这个文件是空的。  
 >> 
 >> Django 应用 仅仅是专用于 Django 项目的 Python 包。应用会按照 Django 约定，创建好 models, tests, urls, 以及 views 等子模块。 
+
+## 你的项目和可复用应用
+
+通过前面的教程，我们的工程应该看起来像这样:
+
+```text
+├─qiaosite
+│  │  db.sqlite3
+│  │  manage.py
+│  │
+│  ├─polls
+│  │  │  admin.py
+│  │  │  apps.py
+│  │  │  models.py
+│  │  │  tests.py
+│  │  │  urls.py
+│  │  │  views.py
+│  │  │  __init__.py
+│  │  │
+│  │  ├─migrations
+│  │  │     0001_initial.py
+│  │  │     __init__.py
+│  │  │
+│  │  ├─static
+│  │  │  └─polls
+│  │  │      │  style.css
+│  │  │      │
+│  │  │      └─images
+│  │  │              background.jpg
+│  │  ├─templates
+│  │     └─polls
+│  │             detail.html
+│  │             index.html
+│  │             results.html
+│  ├─qiaosite
+│  │  │  settings.py
+│  │  │  urls.py
+│  │  │  wsgi.py
+│  │  │  __init__.py
+│  ├─templates
+│  │  └─admin
+│  │          base_site.html
+```
+
+目录 polls 现在可以被拷贝至一个新的 Django 工程，且立刻被复用。不过现在还不是发布它的时候。为了这样做，我们需要打包这个应用，便于其他人安装它。
+
+## 安装必须环境
+
+目前，打包 Python 程序需要工具，有许多工具可以完成此项工作。在此教程中，我们将使用 setuptools 来打包我们的程序。这是推荐的打包工具（与 发布 分支合并）。我们仍旧使用 pip 来安装和卸载这个工具
+
+## 打包你的应用
+
+Python 的 打包 将以一种特殊的格式组织你的应用，意在方便安装和使用这个应用。Django 本身就被打包成类似的形式。对于一个小应用，例如 polls，这不会太难。
+
+1. 首先，在你的 Django 项目目录外创建一个名为 learn-django-polls 的文件夹，用于盛放 polls。
+2. 将 polls 目录移入 learn-django-polls 目录。
+3. 创建一个名为 learn-django-polls/README.rst 的文件，包含以下内容：
+4. 创建一个 learn-django-polls/LICENSE 文件
+5. 创建setup.cfg和setup.py文件用于说明如何构建和安装应用的细节。
+6. 默认包中只包含 Python 模块和包。为了包含额外文件，我们需要创建一个名为 MANIFEST.in 的文件。上一步中关于 setuptools 的文档详细介绍了这个文件。为了包含模板、README.rst 和我们的 LICENSE 文件，创建文件 learn-django-polls/MANIFEST.in 包含以下内容：
+7. 在应用中包含详细文档是可选的，但我们推荐你这样做。创建一个空目录 learn-django-polls/docs 用于未来编写文档。额外添加一行至 learn-django-polls/MANIFEST.in  
+   注意，现在 docs 目录不会被加入你的应用包，除非你往这个目录加几个文件。许多 Django 应用也提供他们的在线文档通过类似 readthedocs.org 这样的网站。
+8. 试着构建你自己的应用包通过 ptyhon setup.py sdist （在 django-polls目录内）。这将创建一个名为 dist 的目录并构建你自己的应用包， learn-django-polls-0.1.tar.gz。
+
+## 使用你自己的包名 
+
+由于我们把 polls 目录移出了项目，所以它无法工作了。我们现在要通过安装我们的新 learn-django-polls 应用来修复这个问题。
+
+1. 为了安装这个包，使用 pip:   
+   `pip install --user django-polls/dist/django-polls-0.1.tar.gz`  
+   注意： 在virtualenv 中安装，不要用--user 选项，这会安装到用户的python目录下。
+2. 幸运的话，你的 Django 项目应该再一次正确运行。启动服务器确认这一点。
+3. 通过 pip 卸载包:  
+   `pip uninstall django-polls`
+     
+## 发布你的应用
+
+现在，你已经对 learn django-polls 完成了打包和测试，准备好向世界分享它！   
+
+将你的包发布至公共仓库，比如 the Python Package Index (PyPI)。 packaging.python.org 有一个不错的 教程 说明如何发布至公共仓库。  
+ 
+## 通过 virtualenv 安装 Python 包
+
+一般来说，这些状况只在你同时运行多个 Django 项目时出现。当这个问题出现时，最好的解决办法是使用 virtualenv。这个工具允许你同时运行多个相互独立的Python环境，每个环境都有各自库和应用包命名空间的拷贝。     
