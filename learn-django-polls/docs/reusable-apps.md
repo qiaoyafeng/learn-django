@@ -78,70 +78,14 @@ Python 的 打包 将以一种特殊的格式组织你的应用，意在方便�
 6. 默认包中只包含 Python 模块和包。为了包含额外文件，我们需要创建一个名为 MANIFEST.in 的文件。上一步中关于 setuptools 的文档详细介绍了这个文件。为了包含模板、README.rst 和我们的 LICENSE 文件，创建文件 learn-django-polls/MANIFEST.in 包含以下内容：
 7. 在应用中包含详细文档是可选的，但我们推荐你这样做。创建一个空目录 learn-django-polls/docs 用于未来编写文档。额外添加一行至 learn-django-polls/MANIFEST.in  
    注意，现在 docs 目录不会被加入你的应用包，除非你往这个目录加几个文件。许多 Django 应用也提供他们的在线文档通过类似 readthedocs.org 这样的网站。
-8. 试着构建你自己的应用包通过 python setup.py sdist （在 learn-django-polls目录内）。这将创建一个名为 dist 的目录并构建你自己的应用包， learn-django-polls-0.1.tar.gz。
-
-打包好后的目录结构：
-
-```text
-
-├─learn-django-polls
-│  │  LICENSE
-│  │  MANIFEST.in
-│  │  README.rst
-│  │  setup.cfg
-│  │  setup.py
-│  │
-│  ├─dist
-│  │      learn-django-polls-0.1.tar.gz
-│  │
-│  ├─docs
-│  │      reusable-apps.md
-│  │
-│  ├─learn_django_polls.egg-info
-│  │      dependency_links.txt
-│  │      PKG-INFO
-│  │      SOURCES.txt
-│  │      top_level.txt
-│  │
-│  └─polls
-│      │  admin.py
-│      │  apps.py
-│      │  models.py
-│      │  tests.py
-│      │  urls.py
-│      │  views.py
-│      │  __init__.py
-│      │
-│      ├─migrations
-│      │  │  0001_initial.py
-│      │  │  __init__.py
-│      │  │
-│      │  └─__pycache__
-│      │          0001_initial.cpython-36.pyc
-│      │          __init__.cpython-36.pyc
-│      │
-│      ├─static
-│      │  └─polls
-│      │      │  style.css
-│      │      │
-│      │      └─images
-│      │              background.jpg
-│      │
-│      ├─templates
-│      │  └─polls
-│      │          detail.html
-│      │          index.html
-│      │          results.html
-
-```
-
+8. 试着构建你自己的应用包通过 ptyhon setup.py sdist （在 django-polls目录内）。这将创建一个名为 dist 的目录并构建你自己的应用包， learn-django-polls-0.1.tar.gz。
 
 ## 使用你自己的包名 
 
 由于我们把 polls 目录移出了项目，所以它无法工作了。我们现在要通过安装我们的新 learn-django-polls 应用来修复这个问题。
 
 1. 为了安装这个包，使用 pip:   
-   `pip install --user learn-django-polls/dist/django-polls-0.1.tar.gz`  
+   `pip install --user django-polls/dist/django-polls-0.1.tar.gz`  
    注意： 在virtualenv 中安装，不要用--user 选项，这会安装到用户的python目录下。
 2. 幸运的话，你的 Django 项目应该再一次正确运行。启动服务器确认这一点。
 3. 通过 pip 卸载包:  
