@@ -25,7 +25,26 @@ admin.site.register(Question,QuestionAdmin)
 以上修改使得 "Publication date" 字段显示在 "Question" 字段之前：
 ![t07-1](_images/t07-1.jpg)
 
+你可能更期望将表单分为几个字段集：
+```python
+from django.contrib import admin
 
+from .models import Question
+
+
+class QuestionAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['question_text']}),
+        ('Date information', {'fields': ['pub_date']}),
+    ]
+
+
+admin.site.register(Question, QuestionAdmin)
+
+```
+
+fieldsets 元组中的第一个元素是字段集的标题。以下是我们的表单现在的样子：
+![t07-2](_images/t07-2.jpg)
 
 
 
